@@ -19,7 +19,8 @@ async function convertMdx1ToCsf(filePath: string) {
   const fileStr = file.toString("utf-8");
   const fileLines = file.toString("utf-8").split("\n");
   const tree = processor.parse(file);
-  const filename = path.basename(filePath, ".mdx");
+  const initialFileName = path.basename(filePath, ".mdx");
+  const filename = initialFileName.endsWith(".stories") ? initialFileName.slice(0, -8) : initialFileName;
   // some files start with numbering
   const filename2 = filename.replace(/\d/g, "");
   const storyImport = pascal(filename2) + "Stories";
@@ -56,7 +57,7 @@ async function convertMdx1ToCsf(filePath: string) {
 import { Heading3, Heading4, Secondary, Title } from "../storybook-common";
 import * as ${storyImport} from "./${filename}.stories";
 import { PropsTable } from "./props-table";
-      `;
+`;
   });
 
   visit<Root, "mdxJsxFlowElement">(
@@ -73,6 +74,7 @@ import { PropsTable } from "./props-table";
 
       storyFile += `
 <Meta of={${storyImport}} />
+
 `;
 
       csfFile += `
@@ -181,7 +183,7 @@ export default meta;
 
 async function program() {
   const paths = await glob([
-    "/Users/roll/lifesg/react-design-system-sb7/stories/**/*.mdx",
+    "/Users/roll/lifesg/react-design-system-sb7/stories/**/*.stories.mdx",
   ]);
 
   for (const filePath of paths) {
